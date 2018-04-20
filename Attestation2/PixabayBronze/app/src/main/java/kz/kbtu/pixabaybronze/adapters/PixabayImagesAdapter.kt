@@ -1,4 +1,4 @@
-package kz.kbtu.pixabaybronze
+package kz.kbtu.pixabaybronze.adapters
 
 import android.content.Context
 import android.support.v7.widget.CardView
@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import kz.kbtu.pixabaybronze.R
+import kz.kbtu.pixabaybronze.helpers.PixabayImages
 
 class PixabayImagesAdapter(val context: Context, val imageList: ArrayList<PixabayImages>, val listener : PixabayImagesListener) :
         RecyclerView.Adapter<PixabayImagesAdapter.PixabayViewHolder>() {
@@ -39,6 +41,12 @@ class PixabayImagesAdapter(val context: Context, val imageList: ArrayList<Pixaba
 
     }
 
+    public fun clear(){
+        val size = imageList.size
+        imageList.clear()
+        notifyItemRangeRemoved(0, size)
+    }
+
     inner class PixabayViewHolder(view : View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         override fun onClick(p0: View?) {
             when(p0!!.id){
@@ -56,6 +64,7 @@ class PixabayImagesAdapter(val context: Context, val imageList: ArrayList<Pixaba
             eachItem.setOnClickListener(this)
         }
     }
+
 
 
 }

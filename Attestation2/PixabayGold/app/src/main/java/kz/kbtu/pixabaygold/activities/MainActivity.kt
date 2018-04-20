@@ -1,4 +1,4 @@
-package kz.kbtu.pixabaybronze
+package kz.kbtu.pixabaygold.activities
 
 import android.content.Intent
 import android.net.Uri
@@ -7,6 +7,10 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.SearchView
+import android.widget.Toast
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
@@ -14,12 +18,33 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_main.*
+import kz.kbtu.pixabaygold.R
+import kz.kbtu.pixabaygold.helpers.Utils
+import kz.kbtu.pixabaysilver.adapters.PixabayImagesAdapter
+import kz.kbtu.pixabaysilver.helpers.PixabayImages
 import org.json.JSONException
 import org.json.JSONObject
 
-class MainActivity : AppCompatActivity(), PixabayImagesAdapter.PixabayImagesListener{
+class MainActivity : AppCompatActivity(), PixabayImagesAdapter.PixabayImagesListener, MenuItem.OnMenuItemClickListener {
+    override fun onMenuItemClick(p0: MenuItem?): Boolean {
+        when(p0!!.itemId){
+            R.id.favs ->{
+                startActivity(Intent(this, FavoritesActivity :: class.java))
+            }
+        }
+        return true
+    }
+
+    override fun onFavsClick(pos: Int) {
+        val list = Utils.getFavsImages()
+        Log.d("TAGISHE", list.toString())
+        list.add(imagesList[pos])
+        Utils.saveFavsImages(list)
+        Toast.makeText(baseContext, "Added", Toast.LENGTH_SHORT).show()
+    }
+
     override fun onItemClick(i: Int) {
-        val intent = Intent(this, ImageDetailActivity :: class.java)
+        val intent = Intent(this, ImageDetailActivity:: class.java)
         intent.putExtra("tags", imagesList[i].tags)
         intent.putExtra("webformatURL", imagesList[i].webFormatURL)
         intent.putExtra("favorites", imagesList[i].favorites)
@@ -63,6 +88,10 @@ class MainActivity : AppCompatActivity(), PixabayImagesAdapter.PixabayImagesList
                 }
             }
         })
+        videos.setOnClickListener{
+            startActivity(Intent(this, VideoSearchActivity :: class.java))
+            finish()
+        }
     }
 
     private fun loadImages(searchFor: String, page: Int) {
@@ -96,4 +125,35 @@ class MainActivity : AppCompatActivity(), PixabayImagesAdapter.PixabayImagesList
 
         requestQueue.add(request)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search, menu)
+
+        val item = menu!!.findItem(R.id.search)
+        val favsItem = menu!!.findItem(R.id.favs)
+
+        val searchView = item.actionView as SearchView
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                recyclerView.removeAllViewsInLayout()
+                imagesList.clear()
+                searchFor = query!!
+                page = 1
+                adapter.clear()
+                loadImages(searchFor, page)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return false
+            }
+
+        })
+        favsItem.setOnMenuItemClickListener(this)
+
+        return true
+    }
+
+
 }
